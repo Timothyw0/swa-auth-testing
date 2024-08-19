@@ -1,4 +1,4 @@
-const puppeteer = require("puppeteer");
+const { default: puppeteer } = require("puppeteer-core");
 const { app } = require("@azure/functions");
 
 app.http("httpTrigger1", {
@@ -11,8 +11,9 @@ app.http("httpTrigger1", {
       const browser = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        executablePath: ".\\chrome-win\\chrome.exe",
       });
-      
+
       const page = await browser.newPage();
       context.log("Pupeteer headless chromium successfully launched");
 
@@ -30,7 +31,7 @@ app.http("httpTrigger1", {
           "Content-Type": "image/png",
         },
       };
-      
+
       return context.res;
     } catch (error) {
       context.log.error(`Error occurred: ${error}`);

@@ -1,5 +1,6 @@
 const { default: puppeteer } = require("puppeteer-core");
 const { app } = require("@azure/functions");
+const chromium = require("@sparticuz/chromium");
 
 app.http("httpTrigger1", {
   methods: ["GET", "POST"],
@@ -8,10 +9,12 @@ app.http("httpTrigger1", {
     try {
       context.log(`Http function processed request for url "${request.url}"`);
 
+      chromium.setHeadlessMode = true;
+      chromium.setGraphicsMode = false;
       const browser = await puppeteer.launch({
         headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath: ".\\chrome-win\\chrome.exe",
+        args: ["--no-sandbox", "--disable-setuid-sandbox", ...chromium.args],
+        executablePath: await chromium.executablePath(),
       });
 
       const page = await browser.newPage();

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",
+    "@sparticuz/chromium": "^126.0.0",
     "puppeteer-core": "^23.1.0"
   },
   "main": "src/{index.js,functions/*.js}"

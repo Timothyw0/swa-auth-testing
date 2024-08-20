@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",
+    "@azure/identity": "^4.4.1",
+    "@azure/keyvault-secrets": "^4.8.0",
     "@sparticuz/chromium": "^126.0.0",
     "puppeteer-core": "^23.1.0"
   },

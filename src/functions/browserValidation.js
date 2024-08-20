@@ -22,14 +22,20 @@ async function browserValidationFunc(request, context) {
   }
 
   let browser, page, requestBody;
+  let credentials = {};
+
+  // STEP 0: Process request body
   try {
     requestBody = await request.json();
-    context.log(`Http function body process as: ${JSON.stringify(requestBody)}`);
+    context.log(
+      `Http function body process as: ${JSON.stringify(requestBody)}`
+    );
   } catch (error) {
     context.error(`Error reading request body: ${error}`);
     return generateFailure(400, "Invalid JSON format");
   }
 
+  // STEP 1: Initialize puppeteer headless chromium
   try {
     chromium.setHeadlessMode = true;
     chromium.setGraphicsMode = false;
@@ -51,6 +57,7 @@ async function browserValidationFunc(request, context) {
     );
   }
 
+  // STEP 2: Navigate to request hostname
   try {
     const encodedURI = encodeURI(requestBody.defaultHostname);
     context.log(`Navigating to: ${encodedURI}`);
@@ -63,12 +70,14 @@ async function browserValidationFunc(request, context) {
     );
   }
 
-  let credentials = {};
+  // STEP 3: Authenticate
   try {
+    // Comment below and hardcode credentials for local testing
     credentials[BASIC_AUTH_PASSWORD] = await getSecretFromKeyVault(
       requestBody.keyvaultName,
       BASIC_AUTH_PASSWORD
     );
+    // credentials[BASIC_AUTH_PASSWORD] = "";
   } catch (error) {
     context.error(`Error occurred: ${error}`);
     return generateFailure(
@@ -83,6 +92,13 @@ async function browserValidationFunc(request, context) {
     await page.type('input[type="password"', credentials[BASIC_AUTH_PASSWORD]);
     await page.keyboard.press("Enter");
     await page.waitForNavigation();
+  } catch (error) {
+    context.error(`Error occurred: ${error}`);
+    return generateFailure(500, "Error occurred during authentication");
+  }
+
+  // STEP 4: Validate Expected Content
+  try {
     const screenshot = await page.screenshot({ fullPage: true });
     return {
       status: 200,
@@ -90,9 +106,14 @@ async function browserValidationFunc(request, context) {
       headers: { "Content-Type": "image/png" },
     };
   } catch (error) {
-    context.error(`Error occured: ${error}`);
-    return generateFailure(500, "Error occurred during authentication");
+    context.error(`Error occurred: ${error}`);
+    return generateFailure(
+      500,
+      "Error occurred during expected content validations"
+    );
   }
+
+  // STEP 5: Logout
 }
 
 app.http("browserValidation", {

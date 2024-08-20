@@ -130,7 +130,7 @@ async function browserValidationFunc(request, context) {
     for (const validation of inputValidations) {
       const { path, expectedContent } = validation;
       const cleanHostname = requestBody.hostname.replace(/\/$/, '');
-      const fullPath = `https://${cleanHostname}/${path}`;
+      const fullPath = `https://${cleanHostname}${path}`;
       const encodedPath = encodeURI(fullPath);
       generateLogMessage(requestBody.hostname, `Now validating ${fullPath} for expected content: ${expectedContent}`);
 

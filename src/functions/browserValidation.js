@@ -80,15 +80,15 @@ async function browserValidationFunc(request, context) {
 
     credentials[BASIC_AUTH_PASSWORD] =
       inputCredentials?.[BASIC_AUTH_PASSWORD_SECRET_NAME] &&
-      (await getSecretFromKeyVault("auth-testing-kv", inputCredentials[BASIC_AUTH_PASSWORD_SECRET_NAME]));
+      (await getSecretFromKeyVault('auth-testing-kv', inputCredentials[BASIC_AUTH_PASSWORD_SECRET_NAME]));
 
     credentials[OIDC_AUTH_EMAIL] =
       inputCredentials?.[OIDC_AUTH_EMAIL_SECRET_NAME] &&
-      (await getSecretFromKeyVault("auth-testing-kv", inputCredentials[OIDC_AUTH_EMAIL_SECRET_NAME]));
+      (await getSecretFromKeyVault('auth-testing-kv', inputCredentials[OIDC_AUTH_EMAIL_SECRET_NAME]));
 
     credentials[OIDC_AUTH_PASSWORD] =
       inputCredentials?.[OIDC_AUTH_PASSWORD_SECRET_NAME] &&
-      (await getSecretFromKeyVault("auth-testing-kv", inputCredentials[OIDC_AUTH_PASSWORD_SECRET_NAME]));
+      (await getSecretFromKeyVault('auth-testing-kv', inputCredentials[OIDC_AUTH_PASSWORD_SECRET_NAME]));
   } catch (error) {
     context.error(`Error occurred: ${error}`);
     return generateFailure(500, 'Error occurred getting secrets from the keyvault');
@@ -111,15 +111,15 @@ async function browserValidationFunc(request, context) {
     await page.waitForSelector('input[type="password"');
 
     generateLogMessage(requestBody.hostname, 'Password input field found, inputting password');
-    await page.type(
-      'input[type="password"',
-      credentials[BASIC_AUTH_PASSWORD] || credentials[OIDC_AUTH_PASSWORD],
-    );
+    await page.type('input[type="password"', credentials[BASIC_AUTH_PASSWORD] || credentials[OIDC_AUTH_PASSWORD]);
     await page.keyboard.press('Enter');
     await page.waitForNavigation();
   } catch (error) {
     context.error(`Error occurred: ${error}. Page: ${await page.content()}`);
-    return generateFailure(500, `Error occurred during authentication, authentication page is not ready yet: ${error}`);
+    return generateFailure(
+      500,
+      `Error occurred during authentication, authentication page may not be ready yet. Check logs for more details. ${error}`,
+    );
   }
 
   // STEP 5: Validate Expected Content
@@ -138,7 +138,7 @@ async function browserValidationFunc(request, context) {
 
       const foundText = await page.evaluate((text) => {
         return document.body.innerText.includes(text);
-      }, expectedContent)
+      }, expectedContent);
       if (!foundText) {
         generateLogMessage(requestBody.hostname, `Validation failed for ${fullPath}`);
         isError = true;

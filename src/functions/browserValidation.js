@@ -162,7 +162,7 @@ async function browserValidationFunc(request, context) {
   }
 }
 
-app.http('browserValidation', {
+app.http('runBrowserValidation', {
   methods: ['POST'],
   authLevel: 'anonymous',
   handler: browserValidationFunc,
